@@ -1,0 +1,14 @@
+name: dotnist-grpc
+
+services:
+  dotnist-grpc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DATABASE_SOURCE_PATH: rds/RDS_2025.06.1_modern_minimal_patched_flattened.db
+    ports:
+      - "3380:3380"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - PORT=3380

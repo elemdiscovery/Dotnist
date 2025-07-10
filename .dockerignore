@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# Build outputs
+**/bin/
+**/obj/
+**/build/
+**/publish/
+
+# IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test files
+**/TestResults/
+**/coverage/
+**/*.Tests/
+
+# Documentation
+README.md
+LICENSE
+
+# Scripts (unless needed for build)
+scripts/
+
+# Downloads
+downloads/
+
+# Docker
+Dockerfile
+.dockerignore 
