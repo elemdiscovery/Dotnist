@@ -1,0 +1,14 @@
+<Project>
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Copyright>Copyright 2025 Elemental Discovery</Copyright>
+        <!-- <Copyright>Copyright 2025 - $([System.DateTime]::Now.Year) Elemental Discovery.</Copyright> -->
+        <Company>Elemental Discovery</Company>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <Authors>Elemental Discovery</Authors>
+        <RepositoryUrl>https://github.com/elemdiscovery/dotnist</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
+</Project>

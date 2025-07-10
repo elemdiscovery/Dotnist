@@ -7,7 +7,13 @@
         <Description>Dotnist gRPC client library</Description>
         <PackageId>Dotnist.Client</PackageId>
         <RootNamespace>Dotnist.Grpc</RootNamespace>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 
     <ItemGroup>
         <Protobuf Include="../Dotnist.Grpc/Protos/nsrl.proto" GrpcServices="Client" />
