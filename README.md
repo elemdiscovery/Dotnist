@@ -12,7 +12,7 @@ This project consists of a variety of components:
 
 - The `Dotnist` library, which does look ups against a provided sqlite database.
 - The `Dotnist.Grpc` gRPC server, which is bundled into the `dotnist-grpc` container image (db included).
-- The `Dotnist.Client` client library, which is just a package that directly provides the generated gRPC client library. You could alternately copy the [`nsrl.proto`](./Dotnist.Grpc/Protos/nsrl.proto) file directly, which is what you would need to do for other libraries.
+- The `Dotnist.Client` client library, which is just a package that directly provides the generated gRPC client library. You could alternately copy the [`nsrl.proto`](./Dotnist.Grpc/Protos/nsrl.proto) file directly, which is what you would need to do for other languages.
 
 ## Usage
 

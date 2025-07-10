@@ -42,6 +42,9 @@ RUN dotnet publish "Dotnist.Grpc/Dotnist.Grpc.csproj" -c Release -o /app/publish
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 
+# Accept build arguments for runtime configuration
+ENV PORT=3380
+
 # Set working directory
 WORKDIR /app
 
@@ -55,12 +58,12 @@ COPY --from=database /nsrl.db /app/database/nsrl.db
 COPY --from=build /app/publish .
 
 # Set environment variables
-ENV ASPNETCORE_URLS=http://+:${PORT:-3380}
+ENV ASPNETCORE_URLS=http://+:${PORT}
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DATABASE_PATH=/app/database/nsrl.db
 
 # Expose port (will be overridden by Cloud Run)
-EXPOSE ${PORT:-3380}
+EXPOSE ${PORT}
 
 # Run the application
 ENTRYPOINT ["dotnet", "Dotnist.Grpc.dll"]
