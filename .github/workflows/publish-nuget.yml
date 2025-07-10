@@ -99,7 +99,7 @@ jobs:
       run: |
         dotnet nuget push ./nupkgs/*.nupkg \
           --api-key ${{ secrets.GITHUB_TOKEN }} \
-          --source https://nuget.pkg.github.com/${{ github.repository }}/index.json \
+          --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \
           --skip-duplicate
           
   publish-nuget:
@@ -125,5 +125,4 @@ jobs:
         dotnet nuget push ./nupkgs/*.nupkg \
           --api-key ${{ secrets.NUGET_GALLERY_KEY }} \
           --source ${{ vars.NUGET_FEED_URL }} \
-          --username ${{ vars.NUGET_USERNAME }} \
           --skip-duplicate 
