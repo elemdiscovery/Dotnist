@@ -1,5 +1,14 @@
 name: Build and Publish NuGet Packages
 
+# Configurable Variables (set as GitHub Repository Variables):
+# - NUGET_FEED_URL: NuGet feed URL (e.g., https://api.nuget.org/v3/index.json for NuGet.org)
+#
+# Required Secrets:
+# - GITHUB_TOKEN: Automatically provided by GitHub Actions
+# - NUGET_GALLERY_KEY: NuGet API key for publishing packages
+#
+# GitHub Packages automatically uses the current repository's package registry
+
 on:
   push:
     branches: [ main ]
@@ -7,7 +16,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -66,9 +75,54 @@ jobs:
     - name: List generated packages
       run: ls -la ./nupkgs/
       
+    - name: Upload packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./nupkgs/*.nupkg
+        retention-days: 1
+        
+  publish-github:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    
+    steps:
+    - name: Download packages
+      uses: actions/download-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./nupkgs
+        
     - name: Publish to GitHub Packages
       run: |
         dotnet nuget push ./nupkgs/*.nupkg \
           --api-key ${{ secrets.GITHUB_TOKEN }} \
-          --source https://nuget.pkg.github.com/elemdiscovery/index.json \
+          --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \
+          --skip-duplicate
+          
+  publish-nuget:
+    needs: build
+    runs-on: ubuntu-latest
+    if: vars.NUGET_FEED_URL != ''
+    env:
+      NUGET_API_KEY: ${{ secrets.NUGET_GALLERY_KEY }}
+    steps:
+    - name: Download packages
+      uses: actions/download-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./nupkgs
+        
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        
+    - name: Publish to NuGet Feed
+      run: |
+        dotnet nuget push ./nupkgs/*.nupkg \
+          --api-key ${{ secrets.NUGET_GALLERY_KEY }} \
+          --source ${{ vars.NUGET_FEED_URL }} \
           --skip-duplicate 
