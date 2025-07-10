@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+option csharp_namespace = "Dotnist.Grpc";
+
+package nsrl;
+
+// The NSRL service definition for hash lookups
+service NsrlService {
+  // Check one or more hashes and return file information for found hashes
+  rpc CheckHashes (HashCheckRequest) returns (HashCheckResponse);
+  
+  // Health check endpoint
+  rpc HealthCheck (HealthRequest) returns (HealthResponse);
+}
+
+// Request for hash lookup (single or multiple hashes)
+message HashCheckRequest {
+  repeated string sha256_hashes = 1;
+}
+
+// Response for hash lookup with file information for found hashes
+message HashCheckResponse {
+  repeated FileInfo found_files = 1;
+  string error_message = 2;
+}
+
+// Detailed file information from minimal database schema
+message FileInfo {
+  string sha256 = 1;
+  int64 package_id = 2;
+  string package_name = 3;
+  string package_version = 4;
+  string package_language = 5;
+  string application_type = 6;
+  string os_name = 7;
+  string os_version = 8;
+  string manufacturer_name = 9;
+}
+
+// Health check request
+message HealthRequest {
+}
+
+// Health check response
+message HealthResponse {
+  bool healthy = 1;
+  string status = 2;
+  string version = 3;
+  string database_path = 4;
+  string error_message = 5;
+  string database_version = 6;
+  string build_set = 7;
+  string build_date = 8;
+  string release_date = 9;
+  string description = 10;
+} 

@@ -482,3 +482,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Local RDS sqlite DB
+downloads/
+rds/

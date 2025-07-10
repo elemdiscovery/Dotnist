@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Description>Dotnist gRPC client library</Description>
+        <PackageId>Dotnist.Client</PackageId>
+        <RootNamespace>Dotnist.Grpc</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Protobuf Include="../Dotnist.Grpc/Protos/nsrl.proto" GrpcServices="Client" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Grpc.Net.Client" Version="2.64.0" />
+        <PackageReference Include="Google.Protobuf" Version="3.25.3" />
+        <PackageReference Include="Grpc.Tools" Version="2.64.0" PrivateAssets="All" />
+    </ItemGroup>
+
+</Project> 
