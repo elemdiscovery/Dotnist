@@ -30,16 +30,13 @@ public class NsrlGrpcService : NsrlService.NsrlServiceBase
             // Add found files
             foreach (var fileInfo in result.FoundFiles)
             {
-                response.FoundFiles.Add(new FileInfo
+                response.FoundFiles.Add(new NistFileInfo
                 {
                     Sha256 = fileInfo.Sha256,
                     PackageId = fileInfo.PackageId,
                     PackageName = fileInfo.PackageName ?? "",
-                    PackageVersion = fileInfo.PackageVersion ?? "",
-                    PackageLanguage = fileInfo.PackageLanguage ?? "",
                     ApplicationType = fileInfo.ApplicationType ?? "",
                     OsName = fileInfo.OsName ?? "",
-                    OsVersion = fileInfo.OsVersion ?? "",
                     ManufacturerName = fileInfo.ManufacturerName ?? ""
                 });
             }
@@ -69,9 +66,6 @@ public class NsrlGrpcService : NsrlService.NsrlServiceBase
                 return new HealthResponse
                 {
                     Healthy = false,
-                    Status = "ERROR",
-                    Version = _version,
-                    DatabasePath = _database.GetType().GetField("_databasePath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(_database)?.ToString() ?? "Unknown",
                     ErrorMessage = "No version information found in database"
                 };
             }
@@ -79,14 +73,18 @@ public class NsrlGrpcService : NsrlService.NsrlServiceBase
             return new HealthResponse
             {
                 Healthy = true,
-                Status = "OK",
-                Version = _version,
-                DatabasePath = _database.GetType().GetField("_databasePath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(_database)?.ToString() ?? "Unknown",
-                DatabaseVersion = versionInfo.Version,
-                BuildSet = versionInfo.BuildSet,
-                BuildDate = versionInfo.BuildDate.ToString("yyyy-MM-dd HH:mm:ss"),
-                ReleaseDate = versionInfo.ReleaseDate.ToString("yyyy-MM-dd HH:mm:ss"),
-                Description = versionInfo.Description
+                VersionInfo = new VersionInfo
+                {
+                    Version = _version,
+                    BuildSet = versionInfo.BuildSet,
+                    BuildDate = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(
+                        DateTime.Parse(versionInfo.BuildDate, null, System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal)
+                    ),
+                    ReleaseDate = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(
+                        DateTime.Parse(versionInfo.ReleaseDate, null, System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal)
+                    ),
+                    Description = versionInfo.Description
+                }
             };
         }
         catch (Exception ex)
@@ -95,9 +93,6 @@ public class NsrlGrpcService : NsrlService.NsrlServiceBase
             return new HealthResponse
             {
                 Healthy = false,
-                Status = "ERROR",
-                Version = _version,
-                DatabasePath = "Unknown",
                 ErrorMessage = ex.Message
             };
         }

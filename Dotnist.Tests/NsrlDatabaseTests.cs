@@ -37,8 +37,8 @@ public class NsrlDatabaseTests
         Assert.NotNull(versionInfo);
         Assert.NotEmpty(versionInfo.Version);
         Assert.NotEmpty(versionInfo.BuildSet);
-        Assert.NotEqual(default(DateTime), versionInfo.BuildDate);
-        Assert.NotEqual(default(DateTime), versionInfo.ReleaseDate);
+        Assert.NotEqual(default(string), versionInfo.BuildDate);
+        Assert.NotEqual(default(string), versionInfo.ReleaseDate);
 
         TestContext.Current.TestOutputHelper?.WriteLine($"Database {dbPath}: Version {versionInfo.Version}, Build {versionInfo.BuildSet}");
     }

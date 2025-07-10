@@ -67,10 +67,10 @@ app.MapGet("/health", async (NsrlDatabase db) =>
         {
             healthy = true,
             status = "OK",
-            database_version = versionInfo.Version,
-            build_set = versionInfo.BuildSet,
-            build_date = versionInfo.BuildDate.ToString("yyyy-MM-dd HH:mm:ss"),
-            release_date = versionInfo.ReleaseDate.ToString("yyyy-MM-dd HH:mm:ss"),
+            databaseVersion = versionInfo.Version,
+            buildSet = versionInfo.BuildSet,
+            buildDate = versionInfo.BuildDate,
+            releaseDate = versionInfo.ReleaseDate,
             description = versionInfo.Description
         });
     }

@@ -172,16 +172,14 @@ public class GrpcIntegrationTests
         // Assert
         Assert.NotNull(response);
         Assert.True(response.Healthy);
-        Assert.Equal("OK", response.Status);
-        Assert.NotNull(response.Version);
-        Assert.NotNull(response.DatabasePath);
-        Assert.NotNull(response.DatabaseVersion);
-        Assert.NotNull(response.BuildSet);
-        Assert.NotNull(response.BuildDate);
-        Assert.NotNull(response.ReleaseDate);
-        Assert.NotNull(response.Description);
+        Assert.NotNull(response.VersionInfo);
+        Assert.NotNull(response.VersionInfo.Version);
+        Assert.NotNull(response.VersionInfo.BuildSet);
+        Assert.NotNull(response.VersionInfo.BuildDate);
+        Assert.NotNull(response.VersionInfo.ReleaseDate);
+        Assert.NotNull(response.VersionInfo.Description);
         Assert.Equal("", response.ErrorMessage);
 
-        LogMessage($"Health check result: Healthy={response.Healthy}, DatabaseVersion={response.DatabaseVersion}");
+        LogMessage($"Health check result: Healthy={response.Healthy}, Version={response.VersionInfo.Version}");
     }
 }

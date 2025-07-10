@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 option csharp_namespace = "Dotnist.Grpc";
 
 package nsrl;
@@ -20,21 +22,18 @@ message HashCheckRequest {
 
 // Response for hash lookup with file information for found hashes
 message HashCheckResponse {
-  repeated FileInfo found_files = 1;
+  repeated NistFileInfo found_files = 1;
   string error_message = 2;
 }
 
 // Detailed file information from minimal database schema
-message FileInfo {
+message NistFileInfo {
   string sha256 = 1;
   int64 package_id = 2;
   string package_name = 3;
-  string package_version = 4;
-  string package_language = 5;
-  string application_type = 6;
-  string os_name = 7;
-  string os_version = 8;
-  string manufacturer_name = 9;
+  string application_type = 4;
+  string os_name = 5;
+  string manufacturer_name = 6;
 }
 
 // Health check request
@@ -44,13 +43,14 @@ message HealthRequest {
 // Health check response
 message HealthResponse {
   bool healthy = 1;
-  string status = 2;
-  string version = 3;
-  string database_path = 4;
-  string error_message = 5;
-  string database_version = 6;
-  string build_set = 7;
-  string build_date = 8;
-  string release_date = 9;
-  string description = 10;
-} 
+  string error_message = 2;
+  VersionInfo version_info = 3;
+}
+
+message VersionInfo {
+  string version = 1;
+  string build_set = 2;
+  google.protobuf.Timestamp build_date = 3;
+  google.protobuf.Timestamp release_date = 4;
+  string description = 5;
+}

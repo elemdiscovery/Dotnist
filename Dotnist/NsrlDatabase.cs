@@ -75,11 +75,8 @@ public class NsrlDatabase : IDisposable
                 mf.sha256 as Sha256,
                 mf.package_id as PackageId,
                 p.name as PackageName,
-                p.version as PackageVersion,
-                p.language as PackageLanguage,
                 p.application_type as ApplicationType,
                 os.name as OsName,
-                os.version as OsVersion,
                 mfg.name as ManufacturerName
             FROM ""FILE"" mf
             JOIN PKG p ON mf.package_id = p.package_id
@@ -124,11 +121,8 @@ public class NsrlFileInfo
     public string Sha256 { get; set; } = string.Empty;
     public long PackageId { get; set; }
     public string? PackageName { get; set; }
-    public string? PackageVersion { get; set; }
-    public string? PackageLanguage { get; set; }
     public string? ApplicationType { get; set; }
     public string? OsName { get; set; }
-    public string? OsVersion { get; set; }
     public string? ManufacturerName { get; set; }
 }
 
@@ -148,7 +142,7 @@ public class NsrlVersionInfo
 {
     public string Version { get; set; } = string.Empty;
     public string BuildSet { get; set; } = string.Empty;
-    public DateTime BuildDate { get; set; }
-    public DateTime ReleaseDate { get; set; }
+    public string BuildDate { get; set; } = string.Empty;
+    public string ReleaseDate { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 }
