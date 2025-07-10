@@ -1,11 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <RootNamespace>Dotnist.Tests</RootNamespace>
-    <TargetFramework>net9.0</TargetFramework>
+    <IsTestProject>true</IsTestProject>
+
     <!--
     To enable the Microsoft Testing Platform 'dotnet test' experience, add property:
       <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
@@ -27,13 +29,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="9.0.7" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageReference Include="xunit.v3" Version="2.0.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.64.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.7" />
   </ItemGroup>
 
   <ItemGroup>
+    <!-- <ProjectReference Include="../Dotnist.Client/Dotnist.Client.csproj" /> -->
     <ProjectReference Include="../Dotnist.Grpc/Dotnist.Grpc.csproj" />
+    <ProjectReference Include="../Dotnist/Dotnist.csproj" />
   </ItemGroup>
 
 </Project>
