@@ -4,6 +4,9 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Description>Dotnist gRPC server</Description>
+    <PackageId>Dotnist.Grpc</PackageId>
+    <RootNamespace>Dotnist.Grpc</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

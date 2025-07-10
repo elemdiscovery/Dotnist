@@ -5,7 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Description>NSRL RDS (Reference Data Set) wrapper library for efficient hash lookups</Description>
-    <PackageTags>nsrl,nist,hash,forensics,ediscovery</PackageTags>
+    <PackageId>Dotnist</PackageId>
+    <RootNamespace>Dotnist</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

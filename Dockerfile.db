@@ -1,0 +1,15 @@
+
+# Database-only image for NSRL database
+FROM scratch
+
+# Copy the database file
+ARG DATABASE_SOURCE_PATH
+COPY ${DATABASE_SOURCE_PATH} /nsrl.db
+
+# Set environment variable for database path
+ENV DATABASE_PATH=/nsrl.db
+
+# OpenContainers labels
+LABEL org.opencontainers.image.description="Flattened version of the NSRL RDS database"
+LABEL org.opencontainers.image.source="https://github.com/elemdiscovery/dotnist"
+LABEL org.opencontainers.image.licenses="MIT"

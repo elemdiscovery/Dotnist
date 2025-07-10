@@ -1,12 +1,16 @@
 # Multi-stage build for NSRL gRPC service
 
-# Database stage - copy database first for better caching
-FROM scratch AS database
-ARG DATABASE_SOURCE_PATH
-COPY ${DATABASE_SOURCE_PATH} /nsrl.db
+# Database stage - copy from the database image
+FROM ghcr.io/elemdiscovery/dotnist-db:latest AS database
 
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+# Accept build arguments for version information
+ARG VERSION=0.0.0-dev
+ARG ASSEMBLY_VERSION=0.0.0.0
+ARG FILE_VERSION=0.0.0.0
+ARG INFORMATIONAL_VERSION=0.0.0-dev+local
 
 # Set working directory
 WORKDIR /src
@@ -19,12 +23,18 @@ COPY ["Dotnist.sln", "./"]
 # Restore dependencies
 RUN dotnet restore "Dotnist.Grpc/Dotnist.Grpc.csproj"
 
-# Copy source code (excluding database files)
+# Copy source code
 COPY Dotnist/ Dotnist/
 COPY Dotnist.Grpc/ Dotnist.Grpc/
 
-# Build the application
-RUN dotnet build "Dotnist.Grpc/Dotnist.Grpc.csproj" -c Release -o /app/build
+# Build the application with version information
+RUN dotnet build "Dotnist.Grpc/Dotnist.Grpc.csproj" -c Release \
+    --no-restore \
+    /p:Version=${VERSION} \
+    /p:AssemblyVersion=${ASSEMBLY_VERSION} \
+    /p:FileVersion=${FILE_VERSION} \
+    /p:InformationalVersion=${INFORMATIONAL_VERSION} \
+    -o /app/build
 
 # Publish the application
 RUN dotnet publish "Dotnist.Grpc/Dotnist.Grpc.csproj" -c Release -o /app/publish
@@ -38,12 +48,11 @@ WORKDIR /app
 # Create directory for database
 RUN mkdir -p /app/database
 
-# Copy database from database stage (this layer won't be invalidated by code changes)
+# Copy database from database image
 COPY --from=database /nsrl.db /app/database/nsrl.db
 
 # Copy the published application
 COPY --from=build /app/publish .
-
 
 # Set environment variables
 ENV ASPNETCORE_URLS=http://+:${PORT:-3380}
@@ -54,4 +63,8 @@ ENV DATABASE_PATH=/app/database/nsrl.db
 EXPOSE ${PORT:-3380}
 
 # Run the application
-ENTRYPOINT ["dotnet", "Dotnist.Grpc.dll"] 
+ENTRYPOINT ["dotnet", "Dotnist.Grpc.dll"]
+
+LABEL org.opencontainers.image.description="gRPC server for the dotnist project, database included."
+LABEL org.opencontainers.image.source="https://github.com/elemdiscovery/dotnist"
+LABEL org.opencontainers.image.licenses="MIT"

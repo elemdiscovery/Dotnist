@@ -8,10 +8,8 @@ public class NsrlDatabaseTests
     public static IEnumerable<object[]> GetDatabaseTestData() => TestDatabaseHelper.GetDatabaseTestData();
 
     [Fact]
-    public void Constructor_WithValidPath_ShouldNotThrow()
+    public void Constructor_WithInValidPath_ShouldThrow()
     {
-        // This test would require a real database file
-        // For now, we'll test the constructor with an invalid path to ensure it throws
         Assert.Throws<FileNotFoundException>(() => new NsrlDatabase("nonexistent.db"));
     }
 

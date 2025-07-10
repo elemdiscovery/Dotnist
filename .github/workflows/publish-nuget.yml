@@ -1,0 +1,74 @@
+name: Build and Publish NuGet Packages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Required for GitVersion to work properly
+      
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v4
+      with:
+        versionSpec: '6.3.x'
+        
+    - name: Determine Version
+      id: gitversion
+      uses: gittools/actions/gitversion/execute@v4
+      with:
+        configFilePath: GitVersion.yml
+        
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build projects
+      run: dotnet build --no-restore --configuration Release
+      
+    - name: Pack Dotnist.Client
+      run: |
+        dotnet pack Dotnist.Client/Dotnist.Client.csproj \
+          --no-build \
+          --configuration Release \
+          --output ./nupkgs \
+          -p:Version=${{ steps.gitversion.outputs.semVer }} \
+          -p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} \
+          -p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} \
+          -p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
+          
+    - name: Pack Dotnist
+      run: |
+        dotnet pack Dotnist/Dotnist.csproj \
+          --no-build \
+          --configuration Release \
+          --output ./nupkgs \
+          -p:Version=${{ steps.gitversion.outputs.semVer }} \
+          -p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} \
+          -p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} \
+          -p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
+          
+    - name: List generated packages
+      run: ls -la ./nupkgs/
+      
+    - name: Publish to GitHub Packages
+      run: |
+        dotnet nuget push ./nupkgs/*.nupkg \
+          --api-key ${{ secrets.GITHUB_TOKEN }} \
+          --source https://nuget.pkg.github.com/elemdiscovery/index.json \
+          --skip-duplicate 
