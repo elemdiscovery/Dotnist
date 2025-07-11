@@ -82,7 +82,8 @@ public class NsrlDatabase : IDisposable
             JOIN PKG p ON mf.package_id = p.package_id
             JOIN OS os ON p.operating_system_id = os.operating_system_id
             JOIN MFG mfg ON p.manufacturer_id = mfg.manufacturer_id
-            WHERE mf.sha256 IN @hashes";
+            WHERE mf.sha256 IN @hashes
+            ORDER BY mf.sha256, mf.package_id, p.name, os.name, mfg.name, p.application_type";
 
         var foundFiles = await GetConnection().QueryAsync<NsrlFileInfo>(sql, new { hashes = normalizedHashes });
         var foundHashes = foundFiles.Select(f => f.Sha256).ToHashSet();
