@@ -58,7 +58,6 @@ COPY --from=database /nsrl.db /app/database/nsrl.db
 COPY --from=build /app/publish .
 
 # Set environment variables
-ENV ASPNETCORE_URLS=http://+:${PORT}
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DATABASE_PATH=/app/database/nsrl.db
 

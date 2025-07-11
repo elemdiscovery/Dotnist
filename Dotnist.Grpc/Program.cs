@@ -3,6 +3,10 @@ using Dotnist;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure URLs at runtime (after Cloud Run sets PORT)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "3380";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 // Add services to the container.
 builder.Services.AddGrpc();
 
