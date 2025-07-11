@@ -5,7 +5,8 @@ on:
     branches: [ main ]
 
 env:
-  REGISTRY_IMAGE: ghcr.io/elemdiscovery/dotnist-grpc
+  DOCKERHUB_IMAGE: ${{ vars.DOCKERHUB_IMAGENAME }}
+  GITHUB_IMAGE: ghcr.io/${{ github.repository_owner }}/dotnist-grpc
 
 jobs:
   build:
@@ -68,6 +69,12 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       
+    - name: Log into Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v3
       with:
@@ -82,7 +89,9 @@ jobs:
         context: .
         file: ./Dockerfile
         platforms: ${{ matrix.platform }}
-        tags: ${{ env.REGISTRY_IMAGE }}
+        tags: |
+          ${{ env.DOCKERHUB_IMAGE }}
+          ${{ env.GITHUB_IMAGE }}
         build-args: |
           VERSION=${{ steps.gitversion.outputs.semVer }}
           ASSEMBLY_VERSION=${{ steps.gitversion.outputs.assemblySemVer }}
@@ -122,6 +131,12 @@ jobs:
         pattern: digests-*
         merge-multiple: true
 
+    - name: Log into Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v3
       with:
@@ -135,14 +150,21 @@ jobs:
     - name: Create manifest list and push
       working-directory: ${{ runner.temp }}/digests
       run: |
-        # Create manifest for latest tag
-        docker buildx imagetools create -t ${{ env.REGISTRY_IMAGE }}:latest \
-          $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+        # Create manifest for latest tag on both registries
+        docker buildx imagetools create -t ${{ env.DOCKERHUB_IMAGE }}:latest \
+          $(printf '${{ env.DOCKERHUB_IMAGE }}@sha256:%s ' *)
+        docker buildx imagetools create -t ${{ env.GITHUB_IMAGE }}:latest \
+          $(printf '${{ env.GITHUB_IMAGE }}@sha256:%s ' *)
         
-        # Create manifest for version tag
-        docker buildx imagetools create -t ${{ env.REGISTRY_IMAGE }}:${{ needs.build.outputs.version }} \
-          $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+        # Create manifest for version tag on both registries
+        docker buildx imagetools create -t ${{ env.DOCKERHUB_IMAGE }}:${{ needs.build.outputs.version }} \
+          $(printf '${{ env.DOCKERHUB_IMAGE }}@sha256:%s ' *)
+        docker buildx imagetools create -t ${{ env.GITHUB_IMAGE }}:${{ needs.build.outputs.version }} \
+          $(printf '${{ env.GITHUB_IMAGE }}@sha256:%s ' *)
 
-    - name: Inspect image
+    - name: Inspect images
       run: |
-        docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:latest 
+        echo "Inspecting Docker Hub image:"
+        docker buildx imagetools inspect ${{ env.DOCKERHUB_IMAGE }}:latest
+        echo "Inspecting GitHub Container Registry image:"
+        docker buildx imagetools inspect ${{ env.GITHUB_IMAGE }}:latest 
