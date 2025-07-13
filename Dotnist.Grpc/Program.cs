@@ -1,5 +1,7 @@
 using Dotnist.Grpc.Services;
 using Dotnist;
+using Grpc.HealthCheck;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,10 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Add services to the container.
 builder.Services.AddGrpc();
+// Smoking health check
+builder.Services.AddGrpcHealthChecks()
+    .AddCheck("", () => HealthCheckResult.Healthy())
+    .AddCheck("dotnist", () => HealthCheckResult.Healthy("Dotnist is healthy"));
 
 // Configure NSRL database - requires explicit configuration
 var databasePath = Environment.GetEnvironmentVariable("DATABASE_PATH") ??
@@ -54,36 +60,13 @@ builder.Services.AddSingleton<NsrlDatabase>(provider =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.MapGrpcService<NsrlGrpcService>();
+app.MapGrpcService<DotnistGrpcService>();
 
-// Health check endpoint
-app.MapGet("/health", async (NsrlDatabase db) =>
-{
-    try
-    {
-        var versionInfo = await db.GetVersionInfoAsync();
-        if (versionInfo == null)
-        {
-            return Results.Json(new { healthy = false, status = "ERROR", error = "No version information found in database" }, statusCode: 500);
-        }
+// Add health check service
+app.MapGrpcHealthChecksService();
 
-        return Results.Ok(new
-        {
-            healthy = true,
-            status = "OK",
-            databaseVersion = versionInfo.Version,
-            buildSet = versionInfo.BuildSet,
-            buildDate = versionInfo.BuildDate,
-            releaseDate = versionInfo.ReleaseDate,
-            description = versionInfo.Description
-        });
-    }
-    catch (Exception ex)
-    {
-        return Results.Json(new { healthy = false, status = "ERROR", error = ex.Message }, statusCode: 500);
-    }
-});
-
-app.MapGet("/", () => "NSRL gRPC Service - Communication with gRPC endpoints must be made through a gRPC client.");
+app.MapGet("/", () => "Dotnist gRPC Service - Communication with gRPC endpoints must be made through a gRPC client.");
 
 app.Run();
+
+public partial class Program { }

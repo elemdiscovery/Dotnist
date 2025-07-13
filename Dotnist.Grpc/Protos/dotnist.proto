@@ -4,15 +4,15 @@ import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "Dotnist.Grpc";
 
-package nsrl;
+package dotnist;
 
-// The NSRL service definition for hash lookups
-service NsrlService {
+// The Dotnist service definition for hash lookups
+service DotnistService {
   // Check one or more hashes and return file information for found hashes
   rpc CheckHashes (HashCheckRequest) returns (HashCheckResponse);
   
-  // Health check endpoint
-  rpc HealthCheck (HealthRequest) returns (HealthResponse);
+  // Version endpoint
+  rpc Version (VersionRequest) returns (VersionResponse);
 }
 
 // Request for hash lookup (single or multiple hashes)
@@ -37,14 +37,12 @@ message NistFileInfo {
 }
 
 // Health check request
-message HealthRequest {
+message VersionRequest {
 }
 
 // Health check response
-message HealthResponse {
-  bool healthy = 1;
-  string error_message = 2;
-  VersionInfo version_info = 3;
+message VersionResponse {
+  VersionInfo version_info = 1;
 }
 
 message VersionInfo {

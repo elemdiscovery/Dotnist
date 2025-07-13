@@ -13,6 +13,16 @@
           "Grpc.Tools": "2.64.0"
         }
       },
+      "Grpc.AspNetCore.HealthChecks": {
+        "type": "Direct",
+        "requested": "[2.64.0, )",
+        "resolved": "2.64.0",
+        "contentHash": "1Emk+CeojQx+Q/YjWq/UMFUvoMxh8DYVIbHfFtlLQyjAjr9JzcOF8ML0P5WlesmEEY3T6OOWmkdkFu/5gFWfHA==",
+        "dependencies": {
+          "Grpc.AspNetCore.Server": "2.64.0",
+          "Grpc.HealthCheck": "2.64.0"
+        }
+      },
       "Dapper": {
         "type": "Transitive",
         "resolved": "2.1.66",
@@ -44,6 +54,15 @@
         "type": "Transitive",
         "resolved": "2.64.0",
         "contentHash": "CFwvZT56TU9D4Znz2qGz2S7XtXjo+t2DlTsa12vs+rKRwOuUI3dv/5vnh7LRgMDcumWOzR8L6IbtCYtJmcp3Rg=="
+      },
+      "Grpc.HealthCheck": {
+        "type": "Transitive",
+        "resolved": "2.64.0",
+        "contentHash": "WvmnH7ohEQE3tEsYNmfDcVkHPWa97XUs+CdzqzDilwoO3LpNzDSyQT5rJGPokt5fPgGtTq7+bZcwcwAufGY7ag==",
+        "dependencies": {
+          "Google.Protobuf": "3.27.0",
+          "Grpc.Core.Api": "2.64.0"
+        }
       },
       "Grpc.Net.Client": {
         "type": "Transitive",

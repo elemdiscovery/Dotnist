@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace Dotnist.Tests;
 
+// TODO: Now that I'm actually reading the test code, this is very wrongly setup.
 public class TestStartup
 {
     private readonly IConfiguration _configuration;
@@ -68,7 +69,7 @@ public class TestStartup
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapGrpcService<NsrlGrpcService>();
+            endpoints.MapGrpcService<DotnistGrpcService>();
         });
     }
 
