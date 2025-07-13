@@ -42,6 +42,10 @@ RUN dotnet publish "Dotnist.Grpc/Dotnist.Grpc.csproj" -c Release -o /app/publish
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 
+LABEL org.opencontainers.image.description="gRPC server for the dotnist project, database included."
+LABEL org.opencontainers.image.source="https://github.com/elemdiscovery/dotnist"
+LABEL org.opencontainers.image.licenses="MIT"
+
 # Accept build arguments for runtime configuration
 ENV PORT=3380
 
@@ -66,7 +70,3 @@ EXPOSE ${PORT}
 
 # Run the application
 ENTRYPOINT ["dotnet", "Dotnist.Grpc.dll"]
-
-LABEL org.opencontainers.image.description="gRPC server for the dotnist project, database included."
-LABEL org.opencontainers.image.source="https://github.com/elemdiscovery/dotnist"
-LABEL org.opencontainers.image.licenses="MIT"

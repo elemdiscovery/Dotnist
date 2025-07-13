@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="../Dotnist.Grpc/Protos/nsrl.proto" GrpcServices="Client" />
+        <Protobuf Include="../Dotnist.Grpc/Protos/dotnist.proto" GrpcServices="Client" />
     </ItemGroup>
 
     <ItemGroup>

@@ -63,7 +63,7 @@ public class GrpcIntegrationTests
     {
         // Arrange
         using var channel = CreateChannel(dbPath);
-        var client = new NsrlService.NsrlServiceClient(channel);
+        var client = new DotnistService.DotnistServiceClient(channel);
         var hash = "0008B261E386296CFF720B14279F0C5EDA4AC6AA612EE36C7895383C55641CCA"; // Known hash from database
 
         LogMessage($"Testing single hash check with database: {dbPath}");
@@ -86,7 +86,7 @@ public class GrpcIntegrationTests
     {
         // Arrange
         using var channel = CreateChannel(dbPath);
-        var client = new NsrlService.NsrlServiceClient(channel);
+        var client = new DotnistService.DotnistServiceClient(channel);
         var hash = "0000000000000000000000000000000000000000000000000000000000000000"; // Non-existent hash
 
         LogMessage($"Testing invalid hash check with database: {dbPath}");
@@ -108,7 +108,7 @@ public class GrpcIntegrationTests
     {
         // Arrange
         using var channel = CreateChannel(dbPath);
-        var client = new NsrlService.NsrlServiceClient(channel);
+        var client = new DotnistService.DotnistServiceClient(channel);
         var hashes = new[]
         {
             "0008B261E386296CFF720B14279F0C5EDA4AC6AA612EE36C7895383C55641CCA", // Known hash from database
@@ -141,7 +141,7 @@ public class GrpcIntegrationTests
     {
         // Arrange
         using var channel = CreateChannel(dbPath);
-        var client = new NsrlService.NsrlServiceClient(channel);
+        var client = new DotnistService.DotnistServiceClient(channel);
 
         LogMessage($"Testing empty hash check with database: {dbPath}");
 
@@ -162,24 +162,22 @@ public class GrpcIntegrationTests
     {
         // Arrange
         using var channel = CreateChannel(dbPath);
-        var client = new NsrlService.NsrlServiceClient(channel);
+        var client = new DotnistService.DotnistServiceClient(channel);
 
         LogMessage($"Testing health check with database: {dbPath}");
 
         // Act
-        var response = await client.HealthCheckAsync(new HealthRequest(), cancellationToken: TestContext.Current.CancellationToken);
+        var response = await client.VersionAsync(new VersionRequest(), cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(response);
-        Assert.True(response.Healthy);
         Assert.NotNull(response.VersionInfo);
         Assert.NotNull(response.VersionInfo.Version);
         Assert.NotNull(response.VersionInfo.BuildSet);
         Assert.NotNull(response.VersionInfo.BuildDate);
         Assert.NotNull(response.VersionInfo.ReleaseDate);
         Assert.NotNull(response.VersionInfo.Description);
-        Assert.Equal("", response.ErrorMessage);
 
-        LogMessage($"Health check result: Healthy={response.Healthy}, Version={response.VersionInfo.Version}");
+        LogMessage($"Health check result: Version={response.VersionInfo.Version}");
     }
 }
