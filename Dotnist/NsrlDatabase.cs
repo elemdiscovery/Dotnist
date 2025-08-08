@@ -12,7 +12,7 @@ namespace Dotnist;
 /// Wrapper for the NSRL RDS (Reference Data Set) minimal database
 /// Provides efficient hash lookups and file information retrieval
 /// </summary>
-public class NsrlDatabase : IDisposable
+public class NsrlDatabase
 {
     private readonly string _databasePath;
     private readonly string _connectionString;
@@ -97,10 +97,6 @@ public class NsrlDatabase : IDisposable
         return result;
     }
 
-    public void Dispose()
-    {
-        // Nothing to dispose; connections are created and disposed per operation
-    }
 }
 
 /// <summary>
