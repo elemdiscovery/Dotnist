@@ -12,11 +12,10 @@ namespace Dotnist;
 /// Wrapper for the NSRL RDS (Reference Data Set) minimal database
 /// Provides efficient hash lookups and file information retrieval
 /// </summary>
-public class NsrlDatabase : IDisposable
+public class NsrlDatabase
 {
     private readonly string _databasePath;
-    private SqliteConnection? _connection;
-    private readonly object _connectionLock = new object();
+    private readonly string _connectionString;
 
     /// <summary>
     /// Initializes a new instance of the NSRL database wrapper
@@ -30,27 +29,14 @@ public class NsrlDatabase : IDisposable
         {
             throw new FileNotFoundException($"NSRL database not found at: {databasePath}");
         }
+
+        _connectionString = $"Data Source={_databasePath};Mode=ReadOnly;";
     }
 
     /// <summary>
-    /// Gets the database connection, creating it if necessary
+    /// Creates a new SQLite connection for each operation
     /// </summary>
-    private SqliteConnection GetConnection()
-    {
-        if (_connection == null)
-        {
-            lock (_connectionLock)
-            {
-                if (_connection == null)
-                {
-                    var connectionString = $"Data Source={_databasePath};Mode=ReadOnly;";
-                    _connection = new SqliteConnection(connectionString);
-                    _connection.Open();
-                }
-            }
-        }
-        return _connection;
-    }
+    private SqliteConnection CreateConnection() => new SqliteConnection(_connectionString);
 
     /// <summary>
     /// Checks multiple hashes and returns file information for found hashes
@@ -85,7 +71,9 @@ public class NsrlDatabase : IDisposable
             WHERE mf.sha256 IN @hashes
             ORDER BY mf.sha256, mf.package_id, p.name, os.name, mfg.name, p.application_type";
 
-        var foundFiles = await GetConnection().QueryAsync<NsrlFileInfo>(sql, new { hashes = normalizedHashes });
+        await using var connection = CreateConnection();
+        await connection.OpenAsync();
+        var foundFiles = await connection.QueryAsync<NsrlFileInfo>(sql, new { hashes = normalizedHashes });
         var foundHashes = foundFiles.Select(f => f.Sha256).ToHashSet();
         var notFoundHashes = hashSet.Except(foundHashes).ToList();
 
@@ -102,16 +90,13 @@ public class NsrlDatabase : IDisposable
     /// <returns>Version information</returns>
     public async Task<NsrlVersionInfo?> GetVersionInfoAsync()
     {
-        var result = await GetConnection().QueryFirstOrDefaultAsync<NsrlVersionInfo>(
+        await using var connection = CreateConnection();
+        await connection.OpenAsync();
+        var result = await connection.QueryFirstOrDefaultAsync<NsrlVersionInfo>(
             "SELECT version as Version, build_set as BuildSet, build_date as BuildDate, release_date as ReleaseDate, description as Description FROM VERSION");
         return result;
     }
 
-    public void Dispose()
-    {
-        _connection?.Dispose();
-        _connection = null;
-    }
 }
 
 /// <summary>

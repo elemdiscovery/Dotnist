@@ -1,5 +1,7 @@
 using Xunit;
 using Dotnist;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace Dotnist.Tests;
 
@@ -29,7 +31,7 @@ public class NsrlDatabaseTests
     [MemberData(nameof(GetDatabaseTestData))]
     public async Task GetVersionInfoAsync_WithValidDatabase_ShouldReturnVersionInfo(string dbPath)
     {
-        using var database = new NsrlDatabase(dbPath);
+        var database = new NsrlDatabase(dbPath);
         var versionInfo = await database.GetVersionInfoAsync();
 
         Assert.NotNull(versionInfo);
@@ -45,7 +47,7 @@ public class NsrlDatabaseTests
     [MemberData(nameof(GetDatabaseTestData))]
     public async Task CheckHashesAsync_WithKnownHashes_ShouldReturnFileInfo(string dbPath)
     {
-        using var database = new NsrlDatabase(dbPath);
+        var database = new NsrlDatabase(dbPath);
 
         // Test with known hashes that should exist in the database
         var knownHashes = new[]
@@ -69,7 +71,7 @@ public class NsrlDatabaseTests
     [MemberData(nameof(GetDatabaseTestData))]
     public async Task CheckHashesAsync_WithSingleHash_ShouldWork(string dbPath)
     {
-        using var database = new NsrlDatabase(dbPath);
+        var database = new NsrlDatabase(dbPath);
 
         var expectedHash = "0008B261E386296CFF720B14279F0C5EDA4AC6AA612EE36C7895383C55641CCA";
         var hashes = new[] { expectedHash };
@@ -85,7 +87,7 @@ public class NsrlDatabaseTests
     [MemberData(nameof(GetDatabaseTestData))]
     public async Task CheckHashesAsync_WithMultipleHashes_ShouldWork(string dbPath)
     {
-        using var database = new NsrlDatabase(dbPath);
+        var database = new NsrlDatabase(dbPath);
 
         // Test with multiple specific hashes - some existing, some not
         var expectedHash1 = "0008B261E386296CFF720B14279F0C5EDA4AC6AA612EE36C7895383C55641CCA";
@@ -121,7 +123,7 @@ public class NsrlDatabaseTests
     [MemberData(nameof(GetDatabaseTestData))]
     public async Task CheckHashesAsync_WithEmptyList_ShouldReturnEmptyResult(string dbPath)
     {
-        using var database = new NsrlDatabase(dbPath);
+        var database = new NsrlDatabase(dbPath);
 
         var result = await database.CheckHashesAsync(new string[0]);
 
@@ -135,7 +137,7 @@ public class NsrlDatabaseTests
     [MemberData(nameof(GetDatabaseTestData))]
     public async Task CheckHashesAsync_WithNullInput_ShouldReturnEmptyResult(string dbPath)
     {
-        using var database = new NsrlDatabase(dbPath);
+        var database = new NsrlDatabase(dbPath);
 
         var result = await database.CheckHashesAsync(null!);
 
@@ -149,7 +151,7 @@ public class NsrlDatabaseTests
     [MemberData(nameof(GetDatabaseTestData))]
     public async Task CheckHashesAsync_WithInvalidHashes_ShouldFilterThem(string dbPath)
     {
-        using var database = new NsrlDatabase(dbPath);
+        var database = new NsrlDatabase(dbPath);
 
         var expectedHash1 = "0008B261E386296CFF720B14279F0C5EDA4AC6AA612EE36C7895383C55641CCA";
         var expectedHash2 = "002F58AD1C6BEA9B560081FA2A5434D782A5CDE21058FBAC8A9FCFC6EB070DA5";
@@ -181,7 +183,7 @@ public class NsrlDatabaseTests
     [MemberData(nameof(GetDatabaseTestData))]
     public async Task CheckHashesAsync_WithSpecificHash_ShouldReturnOrderedResults(string dbPath)
     {
-        using var database = new NsrlDatabase(dbPath);
+        var database = new NsrlDatabase(dbPath);
 
         var hash = "002F59A4DA5A22BB3A4C4B552AFF5DE4EF9FE9404C2720528F76C77818DD0D8E";
         var result = await database.CheckHashesAsync(new[] { hash });
@@ -261,6 +263,62 @@ public class NsrlDatabaseTests
     public void TestDatabaseFiles_ShouldExist()
     {
         Assert.True(TestDatabaseHelper.ValidateTestDatabasesAvailable(TestContext.Current.TestOutputHelper));
+    }
+
+    [Theory]
+    [MemberData(nameof(GetDatabaseTestData))]
+    public async Task CheckHashesAsync_ConcurrentRequests_ShouldNotThrow(string dbPath)
+    {
+        var database = new NsrlDatabase(dbPath);
+
+        // Known-good hashes present in the test dataset(s)
+        var knownHashes = new[]
+        {
+            "0008B261E386296CFF720B14279F0C5EDA4AC6AA612EE36C7895383C55641CCA",
+            "002F58AD1C6BEA9B560081FA2A5434D782A5CDE21058FBAC8A9FCFC6EB070DA5"
+        };
+
+        var degreeOfParallelism = Environment.ProcessorCount * 2;
+        TestContext.Current.TestOutputHelper?.WriteLine($"Running {degreeOfParallelism} concurrent CheckHashesAsync calls against {dbPath}");
+
+        var tasks = Enumerable.Range(0, degreeOfParallelism).Select(async i =>
+        {
+            // Alternate between single-hash and two-hash queries
+            if ((i % 2) == 0)
+            {
+                var single = new[] { knownHashes[i % knownHashes.Length] };
+                var res = await database.CheckHashesAsync(single);
+                Assert.True(res.FoundFiles.Count > 0);
+                Assert.Empty(res.NotFoundHashes);
+            }
+            else
+            {
+                var res = await database.CheckHashesAsync(knownHashes);
+                Assert.True(res.FoundFiles.Count > 0);
+                Assert.Empty(res.NotFoundHashes);
+            }
+        });
+
+        await Task.WhenAll(tasks);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetDatabaseTestData))]
+    public async Task GetVersionInfoAsync_ConcurrentRequests_ShouldNotThrow(string dbPath)
+    {
+        var database = new NsrlDatabase(dbPath);
+
+        var degreeOfParallelism = Math.Max(8, Environment.ProcessorCount * 2);
+        TestContext.Current.TestOutputHelper?.WriteLine($"Running {degreeOfParallelism} concurrent GetVersionInfoAsync calls against {dbPath}");
+
+        var tasks = Enumerable.Range(0, degreeOfParallelism).Select(async _ =>
+        {
+            var info = await database.GetVersionInfoAsync();
+            Assert.NotNull(info);
+            Assert.False(string.IsNullOrWhiteSpace(info!.Version));
+        });
+
+        await Task.WhenAll(tasks);
     }
 }
 
