@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        DATABASE_SOURCE_PATH: rds/RDS_2025.06.1_modern_minimal_patched_flattened.db
+        DATABASE_SOURCE_PATH: rds/RDS_2025.09.1_modern_minimal_patched_flattened.db
     ports:
       - "3381:3381"
     environment:
