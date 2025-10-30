@@ -22,11 +22,18 @@ For usage, look at the tests and the `dotnist.proto` file.
 
 The 'minimal' modern RDS database is comically large at >170 GB after extraction, so we have a manual workflow to shrink the database into just a single package reference for each unique Sha256 hash, discarding the filename and other hash types from the database as well. The library is designed to work with both a full database and the flattened database, but the Docker container bundles this hand made flattened database.
 
+### Versions
+
+| Version | RDS Release |
+|---------|-------------|
+| 1.0.x   | 2025-06-01  |
+| 1.1.x   | 2025-09-01  |
+
 ### Quarterly Updates
 
 In order to apply the quarterly RDS patches:
 
-1. Download the NSRL provided .sql patch.
+1. Download the NSRL provided .sql patch for the modern minimal dataset.
 2. Use `update-database.sh` to apply the patch to a complete (non-flattened) sqlite database.
 3. Use `flatten-sqlite.sh` to generate a flattened database.
 4. Use `build-db-image.sh` to bundle the new flattened database and push it to GHCR.
