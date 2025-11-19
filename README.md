@@ -1,6 +1,6 @@
 # Dotnist
 
-Like deNIST except dotnet. Intended to help identify NIST files in ediscovery processing.
+Like deNIST except dotnet. Intended to help identify NIST files in ediscovery processing. Maintained by [Elemental Discovery](https://elemdiscovery.com).
 
 ## NIST List
 
@@ -10,9 +10,11 @@ The underlying NIST list comes from the [National Software Reference Library](ht
 
 This project consists of a variety of components:
 
-- The `Dotnist` library, which does look ups against a provided sqlite database.
-- The `Dotnist.Grpc` gRPC server, which is bundled into the `dotnist-grpc` container image (db included).
-- The `Dotnist.Client` client library, which is just a package that directly provides the generated gRPC client library. You could alternately copy the [`dotnist.proto`](./Dotnist.Grpc/Protos/dotnist.proto) file directly, which is what you would need to do for other languages.
+- The [`Dotnist`](https://www.nuget.org/packages/Dotnist) library, which does lookups against a provided sqlite database.
+- The [`Dotnist.Grpc`](https://hub.docker.com/r/elemtart/dotnist-grpc) gRPC server, which is bundled into the `dotnist-grpc` container image (db included).
+- The [`Dotnist.Client`](https://www.nuget.org/packages/Dotnist.Client) client library, which is just a package that directly provides the generated gRPC client library. You could alternately copy the [`dotnist.proto`](./Dotnist.Grpc/Protos/dotnist.proto) file directly, which is what you would need to do for other languages.
+
+`Dotnist` and `Dotnist.Client` are available as NuGet packages. The `dotnist-grpc` container is available both on Docker Hub and in this repository's Github Container Registry.
 
 ## Usage
 
@@ -20,7 +22,7 @@ For usage, look at the tests and the `dotnist.proto` file.
 
 ## RDS Database
 
-The 'minimal' modern RDS database is comically large at >170 GB after extraction, so we have a manual workflow to shrink the database into just a single package reference for each unique Sha256 hash, discarding the filename and other hash types from the database as well. The library is designed to work with both a full database and the flattened database, but the Docker container bundles this hand made flattened database.
+The 'minimal' modern RDS database is comically large at >170 GB after extraction, so we have a manual workflow to shrink the database into just a single package reference for each unique Sha256 hash, discarding the filename and other hash types from the database as well. The library is designed to work with both a full database and the flattened database, but the Docker container bundles this handmade flattened database.
 
 ### Versions
 
