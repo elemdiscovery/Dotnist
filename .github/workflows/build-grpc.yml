@@ -3,6 +3,7 @@ name: Build and Push gRPC Image
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 env:
   DOCKERHUB_IMAGE: ${{ vars.DOCKERHUB_IMAGENAME }}
@@ -10,13 +11,15 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - linux/amd64
-          - linux/arm64
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
     permissions:
       contents: read
       packages: write
@@ -116,9 +119,10 @@ jobs:
         retention-days: 1
 
   merge:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - build
+    if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
       packages: write
