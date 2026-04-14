@@ -10,8 +10,8 @@ namespace Dotnist.Tests;
 /// </summary>
 public static class TestDatabaseHelper
 {
-    public const string MinimalDbPath = "rds/RDS_2025.06.1_modern_minimal_patched.db";
-    public const string MinimalDbPathFlattened = "rds/RDS_2025.06.1_modern_minimal_patched_flattened.db";
+    public const string MinimalDbPath = "rds/RDS_2026.03.1_modern_minimal_patched.db";
+    public const string MinimalDbPathFlattened = "rds/RDS_2026.03.1_modern_minimal_patched_flattened.db";
 
     /// <summary>
     /// Gets the solution root directory by walking up the directory tree
