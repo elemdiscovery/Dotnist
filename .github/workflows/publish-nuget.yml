@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0 # Required for GitVersion to work properly
           # For PRs, checkout the PR branch head so GitVersion sees commit messages
@@ -33,18 +33,18 @@ jobs:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
 
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v3.1.11
+        uses: gittools/actions/gitversion/setup@v4.5.0
         with:
-          versionSpec: "6.0.x"
+          versionSpec: "6.7.x"
 
       - name: Determine Version
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v3.1.11
+        uses: gittools/actions/gitversion/execute@v4.5.0
         with:
           configFilePath: GitVersion.yml
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "9.0.x"
 
@@ -80,7 +80,7 @@ jobs:
         run: ls -la ./nupkgs/
 
       - name: Upload packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: nuget-packages
           path: ./nupkgs/*.nupkg
@@ -94,7 +94,7 @@ jobs:
 
     steps:
       - name: Download packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: nuget-packages
           path: ./nupkgs
@@ -114,13 +114,13 @@ jobs:
       NUGET_API_KEY: ${{ secrets.NUGET_GALLERY_KEY }}
     steps:
       - name: Download packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: nuget-packages
           path: ./nupkgs
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "9.0.x"
 
