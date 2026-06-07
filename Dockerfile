@@ -40,7 +40,7 @@ RUN dotnet build "Dotnist.Grpc/Dotnist.Grpc.csproj" -c Release \
 RUN dotnet publish "Dotnist.Grpc/Dotnist.Grpc.csproj" -c Release -o /app/publish
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble-chiseled AS runtime
 
 LABEL org.opencontainers.image.description="gRPC server for the dotnist project, database included."
 LABEL org.opencontainers.image.source="https://github.com/elemdiscovery/dotnist"
@@ -52,14 +52,11 @@ ENV PORT=3380
 # Set working directory
 WORKDIR /app
 
-# Create directory for database
-RUN mkdir -p /app/database
-
 # Copy database from database image
-COPY --from=database /nsrl.db /app/database/nsrl.db
+COPY --from=database --chown=app:app /nsrl.db /app/database/nsrl.db
 
 # Copy the published application
-COPY --from=build /app/publish .
+COPY --from=build --chown=app:app /app/publish .
 
 # Set environment variables
 ENV ASPNETCORE_ENVIRONMENT=Production
