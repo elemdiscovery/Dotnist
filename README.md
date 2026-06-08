@@ -2,6 +2,8 @@
 
 Like deNIST except dotnet. Intended to help identify NIST files in ediscovery processing. Maintained by [Elemental Discovery](https://elemdiscovery.com).
 
+If anyone else finds this library useful definitely feel free to reach out! I'd be curious about what you are working on.
+
 ## NIST List
 
 The underlying NIST list comes from the [National Software Reference Library](https://www.nist.gov/itl/ssd/software-quality-group/national-software-reference-library-nsrl/about-nsrl/nsrl-introduction) and is formally known as the Reference Data Set.
@@ -43,13 +45,3 @@ In order to apply the quarterly RDS patches:
 4. Use `build-db-image.sh` to bundle the new flattened database and push it to GHCR.
 
 After that the build process that runs in Github Actions will be able to use the updated .db file.
-
-## TODO
-
-Some hypothetical improvements that aren't worth the time at the moment:
-
-- Running tests in CI is a hassle since you need the database, one option would be to run the tests in a docker container.
-- A version of this that works against a NIST list stored in a regular hosted database.
-- I didn't bother to configure the image builds to run during pull requests, like you would normally want in a development workflow.
-
-If anyone else finds this library useful definitely feel free to reach out! I'd be curious about what you are working on.

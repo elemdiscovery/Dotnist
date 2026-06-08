@@ -13,7 +13,7 @@ public class NsrlDatabaseTests
     [Fact]
     public void Constructor_WithNullPath_ShouldThrowArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>(() => new NsrlDatabase(null!));
+        Assert.Throws<ArgumentNullException>(() => new NsrlDatabase((string)null!));
     }
 
     [Fact]

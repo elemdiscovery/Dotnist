@@ -25,7 +25,9 @@ Thumbs.db
 # Test files
 **/TestResults/
 **/coverage/
-**/*.Tests/
+# Note: test project sources are intentionally NOT excluded -- the Docker `test`
+# stage builds and runs them. Their build outputs are still excluded by the
+# **/bin/ and **/obj/ rules above, and the runtime image never COPYs them in.
 
 # Documentation
 README.md
