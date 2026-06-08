@@ -26,6 +26,11 @@ Thumbs.db
 **/TestResults/
 **/coverage/
 **/*.Tests/
+# ...except the test project itself, which the Docker `test` stage builds and runs.
+# Its build outputs stay ignored (they are rebuilt inside the image).
+!Dotnist.Tests/
+Dotnist.Tests/bin/
+Dotnist.Tests/obj/
 
 # Documentation
 README.md
