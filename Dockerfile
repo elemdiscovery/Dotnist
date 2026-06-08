@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Multi-stage build for NSRL gRPC service
 
 # Database stage - copy from the database image
@@ -39,6 +40,19 @@ RUN dotnet build "Dotnist.Grpc/Dotnist.Grpc.csproj" -c Release \
 # Publish the application
 RUN dotnet publish "Dotnist.Grpc/Dotnist.Grpc.csproj" -c Release -o /app/publish
 
+# Test stage - runs the test suite against the bundled flattened database.
+# Build this stage explicitly with `--target test` (see build-grpc.yml).
+# The database is bind-mounted read-only from the `database` stage during the
+# test run, so it is never copied into an image layer and is pulled at most
+# once via the shared build cache. NsrlDatabase opens with Mode=ReadOnly, so a
+# read-only mount is sufficient.
+FROM build AS test
+COPY Dotnist.Tests/ Dotnist.Tests/
+RUN dotnet restore "Dotnist.Tests/Dotnist.Tests.csproj"
+RUN --mount=type=bind,from=database,source=/nsrl.db,target=/tmp/nsrl.db \
+    MINIMAL_DB_PATH_FLATTENED=/tmp/nsrl.db \
+    dotnet test "Dotnist.Tests/Dotnist.Tests.csproj" -c Release --no-restore
+
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble-chiseled AS runtime
 
@@ -64,6 +78,9 @@ ENV DATABASE_PATH=/app/database/nsrl.db
 
 # Expose port (will be overridden by Cloud Run)
 EXPOSE ${PORT}
+
+# Run the application as the non-root 'app' user (UID 1654, provided by the chiseled base)
+USER app
 
 # Run the application
 ENTRYPOINT ["dotnet", "Dotnist.Grpc.dll"]

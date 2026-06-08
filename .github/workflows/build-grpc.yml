@@ -1,7 +1,9 @@
-name: Build and Push gRPC Image
+name: Build, Test, and Publish
 
 on:
   push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
   workflow_dispatch:
 
@@ -10,7 +12,56 @@ env:
   GITHUB_IMAGE: ghcr.io/${{ github.repository_owner }}/dotnist-grpc
 
 jobs:
+  test:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Disable man-db to make package install and removal faster
+      run: |
+        echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+        sudo dpkg-reconfigure man-db
+
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
+        android: true
+        dotnet: true # we get this in Docker
+        haskell: true
+        large-packages: false # this is slow apparently
+        docker-images: false
+        swap-storage: true
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v4
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v4
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Run tests in Docker
+      uses: docker/build-push-action@v7
+      with:
+        context: .
+        file: ./Dockerfile
+        target: test
+        platforms: linux/amd64
+        # cacheonly: execute the test RUN steps without exporting an image.
+        outputs: type=cacheonly
+
   build:
+    needs: test
+    # Never build or push on pull requests; only on push to main and manual dispatch.
+    if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -101,8 +152,6 @@ jobs:
           FILE_VERSION=${{ steps.gitversion.outputs.assemblySemFileVer }}
           INFORMATIONAL_VERSION=${{ steps.gitversion.outputs.informationalVersion }}
         outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
 
     - name: Export digest
       run: |
@@ -171,4 +220,119 @@ jobs:
         echo "Inspecting Docker Hub image:"
         docker buildx imagetools inspect ${{ env.DOCKERHUB_IMAGE }}:latest
         echo "Inspecting GitHub Container Registry image:"
-        docker buildx imagetools inspect ${{ env.GITHUB_IMAGE }}:latest 
+        docker buildx imagetools inspect ${{ env.GITHUB_IMAGE }}:latest
+
+  # ---- NuGet packages (Dotnist, Dotnist.Client) ----
+  # Gated by the same `test` job as the container image. Like the image build,
+  # packing/publishing is skipped on pull requests; PRs only run `test`.
+  pack-nuget:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Required for GitVersion to work properly
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4.5.0
+        with:
+          versionSpec: "6.7.x"
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4.5.0
+        with:
+          configFilePath: GitVersion.yml
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build projects
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Pack Dotnist.Client
+        run: |
+          dotnet pack Dotnist.Client/Dotnist.Client.csproj \
+            --no-build \
+            --configuration Release \
+            --output ./nupkgs \
+            -p:Version=${{ steps.gitversion.outputs.semVer }} \
+            -p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} \
+            -p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} \
+            -p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
+
+      - name: Pack Dotnist
+        run: |
+          dotnet pack Dotnist/Dotnist.csproj \
+            --no-build \
+            --configuration Release \
+            --output ./nupkgs \
+            -p:Version=${{ steps.gitversion.outputs.semVer }} \
+            -p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }} \
+            -p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} \
+            -p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}
+
+      - name: List generated packages
+        run: ls -la ./nupkgs/
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v6
+        with:
+          name: nuget-packages
+          path: ./nupkgs/*.nupkg
+          retention-days: 1
+
+  publish-github:
+    needs: pack-nuget
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v7
+        with:
+          name: nuget-packages
+          path: ./nupkgs
+
+      - name: Publish to GitHub Packages
+        run: |
+          dotnet nuget push ./nupkgs/*.nupkg \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \
+            --skip-duplicate
+
+  publish-nuget:
+    needs: pack-nuget
+    runs-on: ubuntu-latest
+    if: vars.NUGET_FEED_URL != ''
+    env:
+      NUGET_API_KEY: ${{ secrets.NUGET_GALLERY_KEY }}
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v7
+        with:
+          name: nuget-packages
+          path: ./nupkgs
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Publish to NuGet Feed
+        run: |
+          dotnet nuget push ./nupkgs/*.nupkg \
+            --api-key ${{ secrets.NUGET_GALLERY_KEY }} \
+            --source ${{ vars.NUGET_FEED_URL }} \
+            --skip-duplicate

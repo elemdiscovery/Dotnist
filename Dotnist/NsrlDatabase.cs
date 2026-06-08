@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Threading.Tasks;
@@ -14,29 +15,45 @@ namespace Dotnist;
 /// </summary>
 public class NsrlDatabase
 {
-    private readonly string _databasePath;
-    private readonly string _connectionString;
+    private readonly Func<DbConnection> _connectionFactory;
 
     /// <summary>
-    /// Initializes a new instance of the NSRL database wrapper
+    /// Initializes a new instance backed by a read-only SQLite database file
+    /// (the bundled RDS database).
     /// </summary>
     /// <param name="databasePath">Path to the SQLite database file</param>
     public NsrlDatabase(string databasePath)
     {
-        _databasePath = databasePath ?? throw new ArgumentNullException(nameof(databasePath));
+        if (databasePath is null)
+        {
+            throw new ArgumentNullException(nameof(databasePath));
+        }
 
         if (!File.Exists(databasePath))
         {
             throw new FileNotFoundException($"NSRL database not found at: {databasePath}");
         }
 
-        _connectionString = $"Data Source={_databasePath};Mode=ReadOnly;";
+        var connectionString = $"Data Source={databasePath};Mode=ReadOnly;";
+        _connectionFactory = () => new SqliteConnection(connectionString);
     }
 
     /// <summary>
-    /// Creates a new SQLite connection for each operation
+    /// Initializes a new instance backed by an arbitrary ADO.NET database, allowing
+    /// the library to run against providers other than SQLite (SQL Server, PostgreSQL, etc.).
+    /// The factory is invoked once per operation to create a fresh connection, so it must
+    /// return a new, unopened connection each time.
     /// </summary>
-    private SqliteConnection CreateConnection() => new SqliteConnection(_connectionString);
+    /// <param name="connectionFactory">Factory that creates a new database connection.</param>
+    public NsrlDatabase(Func<DbConnection> connectionFactory)
+    {
+        _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
+    }
+
+    /// <summary>
+    /// Creates a new connection for each operation using the configured factory
+    /// </summary>
+    private DbConnection CreateConnection() => _connectionFactory();
 
     /// <summary>
     /// Checks multiple hashes and returns file information for found hashes
