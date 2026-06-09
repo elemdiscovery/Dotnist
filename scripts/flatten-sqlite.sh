@@ -18,20 +18,22 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Function to print colored output
+# Use printf '%b' so the \033 escape sequences in the color codes are interpreted
+# (plain echo prints them literally in bash/Git Bash).
 print_status() {
-    echo "${GREEN}[INFO]${NC} $1"
+    printf '%b\n' "${GREEN}[INFO]${NC} $1"
 }
 
 print_warning() {
-    echo "${YELLOW}[WARNING]${NC} $1"
+    printf '%b\n' "${YELLOW}[WARNING]${NC} $1"
 }
 
 print_error() {
-    echo "${RED}[ERROR]${NC} $1"
+    printf '%b\n' "${RED}[ERROR]${NC} $1"
 }
 
 print_info() {
-    echo "${BLUE}[DETAIL]${NC} $1"
+    printf '%b\n' "${BLUE}[DETAIL]${NC} $1"
 }
 
 # Check if source database exists
@@ -67,6 +69,10 @@ sed "s|'source_database.db'|'$SOURCE_DB'|g" "$SQL_SCRIPT" > "$TEMP_SQL"
 
 # Run the migration
 print_status "Creating new database schema and migrating data with consistent ordering..."
+# NOTE: stdin redirection is safe here -- the piped input is the static migration
+# SQL (no binary/control bytes), so the Windows text-mode-stdin issue that affects
+# update-database.sh (0x1A treated as EOF) does not apply. The bulk data with raw
+# control bytes in filenames flows DB->DB inside sqlite via ATTACH, not via stdin.
 sqlite3 "$TARGET_DB" < "$TEMP_SQL"
 
 # Verify the migration
