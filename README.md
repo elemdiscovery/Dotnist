@@ -34,6 +34,7 @@ The 'minimal' modern RDS database is comically large at >170 GB after extraction
 | 1.1.x   | 2025-09-01  |
 | 1.2.x   | 2025-12-01  |
 | 1.3.x   | 2026-03-01  |
+| 1.4.x   | 2026-06-01  |
 
 ### Quarterly Updates
 

@@ -145,7 +145,12 @@ apply_delta_update() {
     # Apply the delta using sqlite3
     if command -v sqlite3 &> /dev/null; then
         log "INFO" "Applying delta using sqlite3..."
-        if sqlite3 "$database_path" < "$delta_sql_path"; then
+        # Use sqlite3's ".read" instead of stdin redirection. On Windows, sqlite3
+        # reads stdin in text mode, where a 0x1A (Ctrl-Z) byte is treated as EOF;
+        # NSRL filenames can contain raw control bytes (incl. 0x1A), which would
+        # truncate the input mid-statement and cause a parse error. ".read" opens
+        # the file in binary mode on all platforms, avoiding that translation.
+        if sqlite3 "$database_path" ".read '$delta_sql_path'"; then
             log "INFO" "Delta update completed successfully"
             return 0
         else
