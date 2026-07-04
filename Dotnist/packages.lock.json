@@ -4,25 +4,25 @@
     "net9.0": {
       "Dapper": {
         "type": "Direct",
-        "requested": "[2.1.72, )",
-        "resolved": "2.1.72",
-        "contentHash": "ns4mGqQd9a/MhP8m6w556vVlZIa0/MfUu03zrxjZC/jlr1uVCsUac8bkdB+Fs98Llbd56rRSo1eZH5VVmeGZyw=="
+        "requested": "[2.1.79, )",
+        "resolved": "2.1.79",
+        "contentHash": "8YijbzgTfmqmQOnVNorYM6K++pxqnW3nJ4aC1sRHzxUA2CcuoJ9gsTem3kgBnPRMc38zZHl4Esb6hAezXIEEuw=="
       },
       "Microsoft.Data.Sqlite": {
         "type": "Direct",
-        "requested": "[9.0.0, )",
-        "resolved": "9.0.0",
-        "contentHash": "lw6wthgXGx3r/U775k1UkUAWIn0kAT0wj4ZRq0WlhPx4WAOiBsIjgDKgWkXcNTGT0KfHiClkM+tyPVFDvxeObw==",
+        "requested": "[9.0.17, )",
+        "resolved": "9.0.17",
+        "contentHash": "oKxC0lyLe2I+jYIv+vyXWIrq5A5kPS+Qg9FhxV1Pkp0D0UUOSbpkd511ScABbnddT15zP9/l6SGKe3exzCEgtg==",
         "dependencies": {
-          "Microsoft.Data.Sqlite.Core": "9.0.0",
+          "Microsoft.Data.Sqlite.Core": "9.0.17",
           "SQLitePCLRaw.bundle_e_sqlite3": "2.1.10",
           "SQLitePCLRaw.core": "2.1.10"
         }
       },
       "Microsoft.Data.Sqlite.Core": {
         "type": "Transitive",
-        "resolved": "9.0.0",
-        "contentHash": "cFfZjFL+tqzGYw9lB31EkV1IWF5xRQNk2k+MQd+Cf86Gl6zTeAoiZIFw5sRB1Z8OxpEC7nu+nTDsLSjieBAPTw==",
+        "resolved": "9.0.17",
+        "contentHash": "ZvqMj1RDSxKbXzTo+zXNvm41nhI5VWAUQ+nKkIKhoi8KnbzleWHMDF5fyimokEaWyANsSMpJCJpiiL8qAgns9Q==",
         "dependencies": {
           "SQLitePCLRaw.core": "2.1.10"
         }
