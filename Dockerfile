@@ -54,7 +54,7 @@ RUN --mount=type=bind,from=database,source=/nsrl.db,target=/tmp/nsrl.db \
     dotnet test "Dotnist.Tests/Dotnist.Tests.csproj" -c Release --no-restore
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble-chiseled AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled AS runtime
 
 LABEL org.opencontainers.image.description="gRPC server for the dotnist project, database included."
 LABEL org.opencontainers.image.source="https://github.com/elemdiscovery/dotnist"
