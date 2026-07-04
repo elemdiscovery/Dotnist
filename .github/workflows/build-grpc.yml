@@ -315,7 +315,7 @@ jobs:
   publish-nuget:
     needs: pack-nuget
     runs-on: ubuntu-latest
-    if: vars.NUGET_ORG != ''
+    if: vars.NUGET_USERNAME != ''
     permissions:
       # Required to mint the OIDC token that NuGet.org trusted publishing exchanges
       # for a short-lived API key.
@@ -336,7 +336,9 @@ jobs:
         id: nuget-login
         uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
         with:
-          user: ${{ vars.NUGET_ORG }}
+          # Must be the nuget.org username of the person who CREATED the
+          # trusted publishing policy, not the org that owns the packages.
+          user: ${{ vars.NUGET_USERNAME }}
 
       - name: Publish to NuGet.org
         run: |
