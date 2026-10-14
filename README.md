@@ -46,4 +46,4 @@ In order to apply the quarterly RDS patches:
 3. Use `flatten-sqlite.sh` to generate a flattened database.
 4. Use `build-db-image.sh` to bundle the new flattened database and push it to GHCR.
 
-After that the build process that runs in Github Actions will be able to use the updated .db file.
+After that the build process that runs in Github Actions will be able to use the updated .db file. `GitVersion.yml` controls the version number. Use `+semver:minor` in the commit message.
